@@ -4,10 +4,10 @@ import (
 	"bufio"
 	"errors"
 	"fmt"
+	"github.com/spacerouter/pam"
 	"log"
 	"os"
 
-	"github.com/SpaceRouter/pam"
 	"github.com/bgentry/speakeasy"
 )
 
