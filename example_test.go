@@ -7,8 +7,8 @@ import (
 	"log"
 	"os"
 
+	"github.com/SpaceRouter/pam"
 	"github.com/bgentry/speakeasy"
-	"github.com/msteinert/pam"
 )
 
 // This example uses whatever default PAM service configuration is available
