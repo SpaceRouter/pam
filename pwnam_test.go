@@ -13,8 +13,14 @@ func TestGetUserInfos001(t *testing.T) {
 	if u.Uid != "0" {
 		t.Skip("run this test as root")
 	}
-	infos := GetUserInfos("louis")
+	infos, err := GetUserInfos("test")
+	if err != nil {
+		t.Fatalf(err.Error())
+	}
 	encoded, _ := json.Marshal(infos)
 	log.Println(string(encoded))
+	if infos.Username == "" {
+
+	}
 	runtime.GC()
 }
