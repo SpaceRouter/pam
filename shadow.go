@@ -73,7 +73,7 @@ func ChangePassword(userId string, newPassword string) error {
 		return err
 	}
 
-	_, err = io.WriteString(stdin, userId+":"+newPassword+"\n")
+	_, err = io.WriteString(stdin, userId+":"+newPassword)
 	if err != nil {
 		return err
 	}
@@ -82,7 +82,10 @@ func ChangePassword(userId string, newPassword string) error {
 	if err != nil {
 		return err
 	}
-
+	err = cmd.Wait()
+	if err != nil {
+		return err
+	}
 	return nil
 
 	/*user := C.CString(userId)

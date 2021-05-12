@@ -8,7 +8,7 @@ package pam
 import "C"
 import (
 	"fmt"
-	"log"
+	"os/exec"
 	"unsafe"
 )
 
@@ -26,7 +26,6 @@ func GetUserInfos(userId string) (*UserInfo, error) {
 	defer C.free(unsafe.Pointer(user))
 
 	pwnam := C.getpwnam(user)
-	log.Println(pwnam)
 
 	if pwnam == nil {
 		return nil, fmt.Errorf("unable to reach user info")
@@ -40,4 +39,14 @@ func GetUserInfos(userId string) (*UserInfo, error) {
 		C.GoString(pwnam.pw_shell),
 	}
 	return &infos, nil
+}
+
+func ChangeUserName(userId string, userName string) error {
+	cmd := exec.Command("chfn", userId, "-f", userName)
+	return cmd.Run()
+}
+
+func ChangeUserEmail(userId string, email string) error {
+	cmd := exec.Command("chfn", userId, "-o", email)
+	return cmd.Run()
 }
