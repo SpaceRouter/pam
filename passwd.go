@@ -43,10 +43,24 @@ func GetUserInfos(userId string) (*UserInfo, error) {
 
 func ChangeUserName(userId string, userName string) error {
 	cmd := exec.Command("chfn", userId, "-f", userName)
-	return cmd.Run()
+	return execCommand(cmd)
 }
 
 func ChangeUserEmail(userId string, email string) error {
 	cmd := exec.Command("chfn", userId, "-o", email)
-	return cmd.Run()
+	return execCommand(cmd)
+}
+
+func execCommand(cmd *exec.Cmd) error {
+
+	err := cmd.Run()
+	if err != nil {
+		output, errO := cmd.Output()
+		if errO != nil {
+			return fmt.Errorf("error %s \n(Parsing error )error: %s", err.Error(), errO.Error())
+		}
+		return fmt.Errorf("error %s \noutput: %s", err.Error(), string(output))
+	}
+
+	return nil
 }
