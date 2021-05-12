@@ -84,7 +84,11 @@ func ChangePassword(userId string, newPassword string) error {
 	}
 	err = cmd.Wait()
 	if err != nil {
-		return err
+		output, outputError := cmd.Output()
+		if outputError != nil {
+			return fmt.Errorf("error %s \n(Parsing error )error: %s", err.Error(), outputError.Error())
+		}
+		return fmt.Errorf("error %s \noutput: %s", err.Error(), string(output))
 	}
 	return nil
 
