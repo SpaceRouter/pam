@@ -53,12 +53,8 @@ func ChangeUserEmail(userId string, email string) error {
 
 func execCommand(cmd *exec.Cmd) error {
 
-	err := cmd.Run()
+	output, err := cmd.Output()
 	if err != nil {
-		output, errO := cmd.Output()
-		if errO != nil {
-			return fmt.Errorf("error %s \n(Parsing error )error: %s", err.Error(), errO.Error())
-		}
 		return fmt.Errorf("error %s \noutput: %s", err.Error(), string(output))
 	}
 
