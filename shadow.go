@@ -64,10 +64,19 @@ func GetPasswordInfo(userId string) (*ShadowPassword, error) {
 func ChangePassword(userId string, newPassword string) error {
 
 	cmd := exec.Command("chpasswd")
+	stdout, err := cmd.StdoutPipe()
+	if err != nil {
+		return err
+	}
 	stdin, err := cmd.StdinPipe()
 	if err != nil {
 		return err
 	}
+	stderr, err := cmd.StderrPipe()
+	if err != nil {
+		return err
+	}
+
 	err = cmd.Start()
 	if err != nil {
 		return err
@@ -82,9 +91,27 @@ func ChangePassword(userId string, newPassword string) error {
 	if err != nil {
 		return err
 	}
-	output, err := cmd.Output()
+
+	err = cmd.Run()
 	if err != nil {
-		return fmt.Errorf("error %s \noutput: %s", err.Error(), string(output))
+		var bufStdout []byte
+		_, errStdout := stdout.Read(bufStdout)
+
+		var bufStderr []byte
+		_, errStderr := stderr.Read(bufStderr)
+
+		errorMessage := "Stdout error"
+		if errStdout == nil {
+			errorMessage = string(bufStdout)
+		}
+
+		if errStderr == nil {
+			errorMessage += " " + string(bufStderr)
+		} else {
+			errorMessage += " Stderr error"
+		}
+
+		return fmt.Errorf("error %s \noutput: %s", err.Error(), errorMessage)
 	}
 	return nil
 
