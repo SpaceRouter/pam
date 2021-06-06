@@ -3,7 +3,9 @@ package pam
 //#include <sys/types.h>
 //#include <stdlib.h>
 //#include <pwd.h>
-//#cgo CFLAGS: -Wall -std=c99
+//extern struct passwd *getpwent (void);
+//extern void endpwent (void);
+//#cgo CFLAGS: -Wall -std=c99 -ansi
 //#cgo LDFLAGS: -lpam
 import "C"
 import (
@@ -25,20 +27,15 @@ func GetUserInfos(userId string) (*UserInfo, error) {
 	user := C.CString(userId)
 	defer C.free(unsafe.Pointer(user))
 
-	pwnam := C.getpwnam(user)
+	pwnam, err := C.getpwnam(user)
+	if err != nil {
+		return nil, err
+	}
 
 	if pwnam == nil {
 		return nil, fmt.Errorf("unable to reach user info")
 	}
-	infos := UserInfo{
-		C.GoString(pwnam.pw_name),
-		uint(C.uint(pwnam.pw_uid)),
-		uint(C.uint(pwnam.pw_gid)),
-		C.GoString(pwnam.pw_gecos),
-		C.GoString(pwnam.pw_dir),
-		C.GoString(pwnam.pw_shell),
-	}
-	return &infos, nil
+	return passwdToUserInfo(pwnam), nil
 }
 
 func ChangeUserName(userId string, userName string) error {
@@ -51,6 +48,19 @@ func ChangeUserEmail(userId string, email string) error {
 	return execCommand(cmd)
 }
 
+func ListUsers() ([]UserInfo, error) {
+	var users []UserInfo
+	defer C.endpwent()
+
+	for {
+		pwnam := C.getpwent()
+		if pwnam == nil {
+			return users, nil
+		}
+		users = append(users, *passwdToUserInfo(pwnam))
+	}
+}
+
 func execCommand(cmd *exec.Cmd) error {
 
 	output, err := cmd.Output()
@@ -59,4 +69,16 @@ func execCommand(cmd *exec.Cmd) error {
 	}
 
 	return nil
+}
+
+func passwdToUserInfo(passwd *C.struct_passwd) *UserInfo {
+	infos := UserInfo{
+		C.GoString(passwd.pw_name),
+		uint(C.uint(passwd.pw_uid)),
+		uint(C.uint(passwd.pw_gid)),
+		C.GoString(passwd.pw_gecos),
+		C.GoString(passwd.pw_dir),
+		C.GoString(passwd.pw_shell),
+	}
+	return &infos
 }

@@ -67,3 +67,14 @@ func TestChangeUserEmail001(t *testing.T) {
 
 	runtime.GC()
 }
+
+func TestListUsers001(t *testing.T) {
+	users, err := ListUsers()
+	if err != nil {
+		t.Fatalf(err.Error())
+	}
+
+	encoded, _ := json.Marshal(users)
+	log.Println(string(encoded))
+	runtime.GC()
+}
