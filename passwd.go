@@ -54,6 +54,11 @@ func AddGroup(username string, group string) error {
 	return execCommand(cmd)
 }
 
+func RemoveGroup(username string, group string) error {
+	cmd := exec.Command("gpasswd", "-d", username, group)
+	return execCommand(cmd)
+}
+
 func ChangeGroups(username string, groups []string) error {
 
 	args := []string{
