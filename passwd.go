@@ -11,6 +11,7 @@ import "C"
 import (
 	"fmt"
 	"os/exec"
+	"strings"
 	"unsafe"
 )
 
@@ -48,6 +49,23 @@ func ChangeUserEmail(userId string, email string) error {
 	return execCommand(cmd)
 }
 
+func AddGroup(username string, group string) error {
+	cmd := exec.Command("usermod", "-aG", group, username)
+	return execCommand(cmd)
+}
+
+func ChangeGroups(username string, groups []string) error {
+
+	args := []string{
+		"-G",
+	}
+	args = append(args, strings.Join(groups, ","))
+	args = append(args, username)
+
+	cmd := exec.Command("usermod", args...)
+	return execCommand(cmd)
+}
+
 func ListUsers() ([]UserInfo, error) {
 	var users []UserInfo
 	defer C.endpwent()
@@ -59,16 +77,6 @@ func ListUsers() ([]UserInfo, error) {
 		}
 		users = append(users, *passwdToUserInfo(pwnam))
 	}
-}
-
-func execCommand(cmd *exec.Cmd) error {
-
-	output, err := cmd.Output()
-	if err != nil {
-		return fmt.Errorf("error %s \noutput: %s", err.Error(), string(output))
-	}
-
-	return nil
 }
 
 func passwdToUserInfo(passwd *C.struct_passwd) *UserInfo {
