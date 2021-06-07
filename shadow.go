@@ -92,7 +92,7 @@ func ChangePassword(userId string, newPassword string) error {
 		return err
 	}
 
-	err = cmd.Run()
+	err = cmd.Wait()
 	if err != nil {
 		var bufStdout []byte
 		_, errStdout := stdout.Read(bufStdout)
@@ -114,67 +114,4 @@ func ChangePassword(userId string, newPassword string) error {
 		return fmt.Errorf("error %s \noutput: %s", err.Error(), errorMessage)
 	}
 	return nil
-
-	/*user := C.CString(userId)
-	password := C.CString(newPassword)
-	defer C.free(unsafe.Pointer(user))
-	defer C.free(unsafe.Pointer(password))
-
-
-	spnam := C.getspnam(user)
-	if spnam == nil {
-		return fmt.Errorf("unable to reach user info")
-	}
-
-	hashed, err := crypt.Crypt(newPassword, C.GoString(spnam.sp_pwdp))
-	if err != nil {
-		return err
-	}
-
-	CHashed := C.CString("hashed")
-	defer C.free(unsafe.Pointer(CHashed))
-
-
-	//spnam.sp_pwdp = CHashed
-	C.strcpy(spnam.sp_pwdp, CHashed)
-
-	fmt.Println(hashed)
-	fmt.Println(C.GoString(spnam.sp_pwdp))
-
-	shadowPath := C.CString("/etc/shadow")
-	shadowFlags := C.CString("rw")
-	defer C.free(unsafe.Pointer(shadowPath))
-	defer C.free(unsafe.Pointer(shadowFlags))
-
-	fd := C.fopen(shadowPath, shadowFlags)
-	if fd == nil {
-		return fmt.Errorf("cannot open shadow file")
-	}
-
-	defer C.free(unsafe.Pointer(fd))
-
-	lck := C.lckpwdf()
-	if int(lck) != 0 {
-		return fmt.Errorf("cannot lock shadow file")
-	}
-	r := C.putspent(spnam, fd)
-	if int(r) != 0 {
-		return fmt.Errorf("cannot put informations in shadow file")
-	}
-	C.ulckpwdf()
-	if int(r) != 0 {
-		return fmt.Errorf("cannot unlock shadow file")
-	}
-
-
-	if r == C.EACCES {
-		return fmt.Errorf("the caller does not have permission to access the shadow password file")
-	} else if r == C.ERANGE {
-		return fmt.Errorf("supplied buffer is too small")
-	}
-
-	log.Println("return")
-	log.Println(int(r))
-
-	return nil*/
 }
