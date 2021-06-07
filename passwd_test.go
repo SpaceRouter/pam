@@ -86,6 +86,43 @@ func TestListUsers001(t *testing.T) {
 
 }
 
+func TestRemoveGroup001(t *testing.T) {
+	defer runtime.GC()
+
+	u, _ := user.Current()
+	if u.Uid != "0" {
+		t.Skip("run this test as root")
+	}
+
+	t.Run("TestAddGroup001", TestAddGroup001)
+
+	err := RemoveGroup("test", "sudo")
+	if err != nil {
+		t.Fatalf(err.Error())
+	}
+
+	userLookup, err := user.Lookup("test")
+	if err != nil {
+		t.Fatalf(err.Error())
+	}
+
+	group, err := user.LookupGroup("sudo")
+	if err != nil {
+		t.Fatalf(err.Error())
+	}
+
+	userGroups, err := userLookup.GroupIds()
+	if err != nil {
+		t.Fatalf(err.Error())
+	}
+
+	for _, userGroup := range userGroups {
+		if userGroup == group.Gid {
+			t.Fail()
+		}
+	}
+}
+
 func TestAddGroup001(t *testing.T) {
 	defer runtime.GC()
 
